@@ -140,7 +140,7 @@ function _get_secrets($defaults)
   //   die('Could not parse json in secrets file. Aborting!');
   // }
 
-  $secrets += $defaults;
+  $secrets = $defaults;
   $secrets['url'] = 'https://hooks.slack.com/services/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';
   
   return $secrets;
