@@ -1,0 +1,83 @@
+version: 2.1
+
+# Jobs or tasks that can be ran.
+jobs:
+  run_codesniffers:
+    machine: true
+    steps:
+      - run:
+          name: Only run this job for Pull Requests
+          command: "[[ -z CIRCLE_PR_NUMBER ]] && circleci step halt || true"
+      - checkout
+      - run:
+          name: "Running code sniffers."
+          command: sh .circleci/scripts/run_codesniffers.sh
+      - store_artifacts:
+          path: /tmp/codeclimate_report.html
+          destination: codeclimate_report.html
+      - run:
+          name: "Posting Codesniffer report on PR comment."
+          command: sh .circleci/scripts/post_codesniffer_report.sh
+  build:
+    working_directory: /home/agent/build
+    docker:
+      - image: docksal/ci-agent:php
+    steps:
+      - checkout
+      - run: DEBUG=1 source build-env
+      - run:
+          name: "Install packages needed for build process."
+          command: |
+            sudo apk add --update --no-cache nodejs
+            sudo apk add --update --no-cache nodejs-npm
+            sudo apk add --update --no-cache libarchive-tools
+            sudo apk add --update --no-cache yarn
+            sudo apk add --update --no-cache apache2-utils
+      - run:
+          name: "Export yarn global bin to bash env"
+          command: |
+            echo "PATH=$PATH:$(yarn global bin)" >> $BASH_ENV
+            source $BASH_ENV
+      - run:
+          name: "Install Dependencies"
+          command: |
+            composer install --ignore-platform-reqs
+      - run:
+          name: "Compile Styles and Pattern lab"
+          working_directory: /home/agent/build/web/themes/custom/emulsify
+          command: |
+            composer install
+            npm install
+            npm run start
+            # php ./pattern-lab/core/console --generate
+            # cp patternlab_htaccess pattern-lab/public/.htaccess
+      - run:
+          name: "Install Prettydiff"
+          working_directory: /home/agent/build/
+          command: |
+            yarn global add pretty-diff
+      - run:
+          name: "Git Setup"
+          command: |
+            if [ ! -d "$HOME/.ssh" ]; then
+                  mkdir $HOME/.ssh
+            fi
+            echo 'StrictHostKeyChecking no' > ~/.ssh/config
+      - run:
+          name: Config diff checker
+          working_directory: /home/agent/build/
+          command: sh .circleci/scripts/config_diff.sh
+
+# Workflows
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build:
+          context: org-global
+  # just_push:
+  #   jobs:
+  #     - pantheon/push
+
+orbs:
+  pantheon: pantheon-systems/pantheon@0.1.0
