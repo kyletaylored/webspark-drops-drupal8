@@ -132,12 +132,14 @@ _slack_notification($secrets['url'], $text, $attachment, $secrets['always_show_t
  */
 function _get_secrets($defaults)
 {
-  $secretsContents = file_get_contents('https://us-central1-speedmob-api.cloudfunctions.net/Slack');
-  $secrets = json_decode($secretsContents, 1);
-  if ($secrets == false) {
-    die('Could not parse json in secrets file. Aborting!');
-  }
+  // $secretsContents = file_get_contents('https://us-central1-speedmob-api.cloudfunctions.net/Slack');
+  // $secrets = json_decode($secretsContents, 1);
+  // if ($secrets == false) {
+  //   die('Could not parse json in secrets file. Aborting!');
+  // }
+
   $secrets += $defaults;
+  $secrets['url'] = 'https://hooks.slack.com/services/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';
   
   return $secrets;
 }
@@ -157,13 +159,17 @@ function _slack_notification($slack_url, $text, $attachment, $alwaysShowText = f
     $post['text'] = $text;
   }
   $payload = json_encode($post);
-  $ch = curl_init();
-  curl_setopt($ch, CURLOPT_URL, $slack_url);
-  curl_setopt($ch, CURLOPT_POST, 1);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_TIMEOUT, 5);
-  curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-  curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+  $opts = [
+    'http' => [
+      'method'  => 'POST',
+      'header'  => 'Content-type: application/json',
+      'content' => $payload,
+    ]
+  ];
+  $context  = stream_context_create($opts);
+  $result = file_get_contents($slack_url, false, $context);
+  var_dump($result);
+
   // Watch for messages with `terminus workflows watch --site=SITENAME`
   print("\n==== Posting to Slack ====\n");
   $result = curl_exec($ch);
