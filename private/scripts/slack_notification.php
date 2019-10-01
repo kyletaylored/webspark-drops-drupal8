@@ -13,6 +13,7 @@ $defaults = array(
 
 // Load our hidden credentials.
 $secrets = _get_secrets($defaults);
+var_dump($secrets);
 
 // Build an array of fields to be rendered with Slack Attachments as a table
 // attachment-style formatting:
@@ -122,6 +123,7 @@ $attachment = array(
   'fields' => $fields
 );
 
+print('Starting Slack notification');
 _slack_notification($secrets['url'], $text, $attachment, $secrets['always_show_text']);
 
 
