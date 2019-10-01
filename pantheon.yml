@@ -37,6 +37,9 @@ workflows:
       - type: webphp
         description: Post to Slack after each code pushed
         script: private/scripts/slack_notification.php
+      - type: webphp
+        description: Debugging
+        script: private/scripts/debug.php
 
   # Database Clones
   clone_database:
@@ -58,9 +61,6 @@ workflows:
       - type: webphp
         description: Post to Slack before cloning the database
         script: private/scripts/slack_notification.php
-      - type: webphp
-        description: Debugging
-        script: private/scripts/debug.php
     after:
       - type: webphp
         description: Post to Slack after each deploy
