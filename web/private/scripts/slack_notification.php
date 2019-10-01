@@ -7,13 +7,11 @@ $pantheon_yellow = '#EFD01B';
 // The full Slack Message API allows you to specify other channels and enhance the messagge further
 // if you like: https://api.slack.com/docs/messages/builder
 $defaults = array(
-  'slack_username' => 'Pantheon',
   'always_show_text' => false,
 );
 
 // Load our hidden credentials.
 $secrets = _get_secrets($defaults);
-var_dump($secrets);
 
 // Build an array of fields to be rendered with Slack Attachments as a table
 // attachment-style formatting:
@@ -123,9 +121,7 @@ $attachment = array(
   'fields' => $fields
 );
 
-print('Starting Slack notification');
 _slack_notification($secrets['url'], $text, $attachment, $secrets['always_show_text']);
-
 
 /**
  * Get secrets from secrets file.
@@ -153,8 +149,9 @@ function _slack_notification($slack_url, $text, $attachment, $alwaysShowText = f
 {
   $attachment['fallback'] = $text;
   $post = array(
-    // 'icon_emoji' => ':lightning_cloud:',
-    'icon_url' => 'https://pantheon.io/sites/all/themes/zeus/images/icons/logo-pantheon--icon.svg',
+    'username' => 'Pantheon',
+    'icon_emoji' => ':lightning_cloud:',
+    'icon_url' => 'https://logos.bugcrowdusercontent.com/logos/ecb1/6de7/3b2e721d/f57bced5e10540f0c9b5a071332f362b_pantheon.png',
     'attachments' => array($attachment)
   );
   if ($alwaysShowText) {
@@ -169,15 +166,12 @@ function _slack_notification($slack_url, $text, $attachment, $alwaysShowText = f
     ]
   ];
   $context  = stream_context_create($opts);
-  $result = file_get_contents($slack_url, false, $context);
-  var_dump($result);
 
   // Watch for messages with `terminus workflows watch --site=SITENAME`
   print("\n==== Posting to Slack ====\n");
-  $result = curl_exec($ch);
+  $result = file_get_contents($slack_url, false, $context);
   print("RESULT: $result");
   // $payload_pretty = json_encode($post,JSON_PRETTY_PRINT); // Uncomment to debug JSON
   // print("JSON: $payload_pretty"); // Uncomment to Debug JSON
   print("\n===== Post Complete! =====\n");
-  curl_close($ch);
 }
