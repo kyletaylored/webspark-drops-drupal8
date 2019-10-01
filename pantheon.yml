@@ -1,29 +1,9 @@
 ---
 api_version: 1
 
-# PHP Version:
-# https://pantheon.io/docs/pantheon-yml#php-version
-# Set site's PHP version to 7.0
-php_version: 7.2
-
-# Drush Version
-# https://pantheon.io/docs/pantheon-yml/#drush-version
-drush_version: 8
-
-# Nested Docroot
-# https://pantheon.io/docs/pantheon-yml#nested-docroot
-web_docroot: true
-
 # Quicksilver Platform Integration Hooks
 # https://pantheon.io/docs/pantheon-yml#quicksilver
 workflows:
-  # Site Creation
-  deploy_product:
-    after:
-      - type: webphp
-        description: Post to Slack after site creation
-        script: private/scripts/slack_notification.php
-
   # Multidev Creation
   create_cloud_development_environment:
     after:
@@ -35,11 +15,11 @@ workflows:
   sync_code:
     after:
       - type: webphp
-        description: Post to Slack after each code pushed
-        script: private/scripts/slack_notification.php
-      - type: webphp
         description: Debugging
         script: private/scripts/debug.php
+      - type: webphp
+        description: Post to Slack after each code pushed
+        script: private/scripts/slack_notification.php
 
   # Database Clones
   clone_database:
