@@ -151,7 +151,6 @@ function _slack_notification($slack_url, $text, $attachment, $alwaysShowText = f
   $post = array(
     'username' => 'Pantheon',
     'icon_emoji' => ':lightning_cloud:',
-    'icon_url' => 'https://logos.bugcrowdusercontent.com/logos/ecb1/6de7/3b2e721d/f57bced5e10540f0c9b5a071332f362b_pantheon.png',
     'attachments' => array($attachment)
   );
   if ($alwaysShowText) {

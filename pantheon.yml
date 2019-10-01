@@ -15,9 +15,6 @@ workflows:
   sync_code:
     after:
       - type: webphp
-        description: Debugging
-        script: private/scripts/debug.php
-      - type: webphp
         description: Post to Slack after each code pushed
         script: private/scripts/slack_notification.php
 
