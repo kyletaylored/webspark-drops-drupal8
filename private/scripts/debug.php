@@ -14,4 +14,6 @@ foreach ($env as $key => $value) {
   }
 }
 print_r($env);
+print_r($_POST);
+print_r($_SERVER);
 echo "\n-------- END ENVIRONMENT ----------\n";
