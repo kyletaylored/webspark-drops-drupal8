@@ -12,8 +12,7 @@ $defaults = array(
 );
 
 // Load our hidden credentials.
-// See the README.md for instructions on storing secrets.
-$secrets = _get_secrets(array('url'), $defaults);
+$secrets = _get_secrets($defaults);
 
 // Build an array of fields to be rendered with Slack Attachments as a table
 // attachment-style formatting:
@@ -131,7 +130,7 @@ _slack_notification($secrets['url'], $text, $attachment, $secrets['always_show_t
  *
  * @param array $requiredKeys  List of keys in secrets file that must exist.
  */
-function _get_secrets($requiredKeys, $defaults)
+function _get_secrets($defaults)
 {
   $secretsContents = file_get_contents('https://us-central1-speedmob-api.cloudfunctions.net/Slack');
   $secrets = json_decode($secretsContents, 1);
@@ -139,11 +138,7 @@ function _get_secrets($requiredKeys, $defaults)
     die('Could not parse json in secrets file. Aborting!');
   }
   $secrets += $defaults;
-  array_unique($secrets); // Clean out array.
-  $missing = array_diff($requiredKeys, array_keys($secrets));
-  if (!empty($missing)) {
-    die('Missing required keys in json secrets file: ' . implode(',', $missing) . '. Aborting!');
-  }
+  
   return $secrets;
 }
 
