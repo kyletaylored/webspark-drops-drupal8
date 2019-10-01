@@ -13,7 +13,7 @@ $defaults = array(
 
 // Load our hidden credentials.
 // See the README.md for instructions on storing secrets.
-$secrets = _get_secrets(array('slack_url'), $defaults);
+$secrets = _get_secrets(array('url'), $defaults);
 
 // Build an array of fields to be rendered with Slack Attachments as a table
 // attachment-style formatting:
@@ -123,8 +123,7 @@ $attachment = array(
   'fields' => $fields
 );
 
-// https://hooks.slack.com/services/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
-_slack_notification($secrets['slack_url'], $secrets['slack_channel'], $secrets['slack_username'], $text, $attachment, $secrets['always_show_text']);
+_slack_notification($secrets['url'], $text, $attachment, $secrets['always_show_text']);
 
 
 /**
@@ -134,16 +133,13 @@ _slack_notification($secrets['slack_url'], $secrets['slack_channel'], $secrets['
  */
 function _get_secrets($requiredKeys, $defaults)
 {
-  $secretsFile = $_SERVER['HOME'] . '/files/private/secrets.json';
-  if (!file_exists($secretsFile)) {
-    die('No secrets file found. Aborting!');
-  }
-  $secretsContents = file_get_contents($secretsFile);
+  $secretsContents = file_get_contents('https://us-central1-speedmob-api.cloudfunctions.net/Slack');
   $secrets = json_decode($secretsContents, 1);
   if ($secrets == false) {
     die('Could not parse json in secrets file. Aborting!');
   }
   $secrets += $defaults;
+  array_unique($secrets); // Clean out array.
   $missing = array_diff($requiredKeys, array_keys($secrets));
   if (!empty($missing)) {
     die('Missing required keys in json secrets file: ' . implode(',', $missing) . '. Aborting!');
@@ -154,12 +150,10 @@ function _get_secrets($requiredKeys, $defaults)
 /**
  * Send a notification to slack
  */
-function _slack_notification($slack_url, $channel, $username, $text, $attachment, $alwaysShowText = false)
+function _slack_notification($slack_url, $text, $attachment, $alwaysShowText = false)
 {
   $attachment['fallback'] = $text;
   $post = array(
-    'username' => $username,
-    'channel' => $channel,
     // 'icon_emoji' => ':lightning_cloud:',
     'icon_url' => 'https://pantheon.io/sites/all/themes/zeus/images/icons/logo-pantheon--icon.svg',
     'attachments' => array($attachment)
